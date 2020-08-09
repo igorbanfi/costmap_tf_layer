@@ -1,0 +1,5 @@
+<library path="lib/libtf_layer">
+  <class type="tf_layer::TfLayer" base_class_type="costmap_2d::Layer">
+    <description>tf layer</description>
+  </class>
+</library>
