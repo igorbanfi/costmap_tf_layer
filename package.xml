@@ -2,7 +2,7 @@
   <name>tf_layer</name>
   <version>1.0.0</version>
   <description>
-    ROS-package that implements a costmap layer populated by observing tf frames. 
+    ROS-package that implements a costmap layer populated by observing tf frames.
   </description>
 
   <maintainer email="banfi.igor@windowslive.com">Igor Banfi</maintainer>
@@ -11,14 +11,10 @@
 
     <buildtool_depend>catkin</buildtool_depend>
     <depend>costmap_2d</depend>
-    <depend>directed_msgs</depend>
-    <depend>nav_msgs</depend>
     <depend>dynamic_reconfigure</depend>
-    <depend>geometry_msgs</depend>
     <depend>pluginlib</depend>
     <depend>roscpp</depend>
     <depend>rospy</depend>
-    <depend>sensor_msgs</depend>
     <depend>tf2_geometry_msgs</depend>
     <test_depend>roslint</test_depend>
 

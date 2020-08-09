@@ -5,19 +5,18 @@ project(tf_layer)
 find_package(catkin REQUIRED COMPONENTS
   costmap_2d
   dynamic_reconfigure
-  geometry_msgs
   pluginlib
   roscpp
-  sensor_msgs
   tf2_geometry_msgs
-  directed_msgs
-  nav_msgs
 )
 
-#generate_dynamic_reconfigure_options(cfg/tf_layer.cfg)
-
 catkin_package(
-    CATKIN_DEPENDS costmap_2d dynamic_reconfigure geometry_msgs pluginlib roscpp sensor_msgs tf2_geometry_msgs directed_msgs nav_msgs
+    CATKIN_DEPENDS
+    costmap_2d
+    dynamic_reconfigure
+    pluginlib
+    roscpp
+    tf2_geometry_msgs
     INCLUDE_DIRS include
     LIBRARIES tf_layer
 )
@@ -47,4 +46,3 @@ install(FILES costmap_plugins.xml
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
-#catkin_install_python(PROGRAMS scripts/send_message.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
