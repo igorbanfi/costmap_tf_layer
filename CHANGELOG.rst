@@ -2,7 +2,7 @@
 Changelog for package tf_layer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2020-08-10)
+------------------
 * Initial commit
 * Contributors: Igor Banfi
