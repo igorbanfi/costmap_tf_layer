@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(tf_layer)
+project(costmap_tf_layer)
 
 
 find_package(catkin REQUIRED COMPONENTS
@@ -18,13 +18,13 @@ catkin_package(
     roscpp
     tf2_geometry_msgs
     INCLUDE_DIRS include
-    LIBRARIES tf_layer
+    LIBRARIES costmap_tf_layer
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} src/tf_layer.cpp)
-add_dependencies(${PROJECT_NAME} ${tf_layer_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(${PROJECT_NAME} src/costmap_tf_layer.cpp)
+add_dependencies(${PROJECT_NAME} ${costmap_tf_layer_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
@@ -33,7 +33,7 @@ if(CATKIN_ENABLE_TESTING)
   roslint_add_test()
 endif()
 
-install(TARGETS tf_layer
+install(TARGETS costmap_tf_layer
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
