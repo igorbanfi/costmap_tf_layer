@@ -1,6 +1,6 @@
 <package format="2">
   <name>costmap_tf_layer</name>
-  <version>1.0.2</version>
+  <version>1.0.1</version>
   <description>
     ROS-package that implements a costmap layer populated by observing tf frames.
   </description>
