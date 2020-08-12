@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TF_LAYER_TF_LAYER_H_
-#define TF_LAYER_TF_LAYER_H_
+#ifndef COSTMAP_TF_LAYER_COSTMAP_TF_LAYER_H_
+#define COSTMAP_TF_LAYER_COSTMAP_TF_LAYER_H_
 
 #include <ros/ros.h>
 #include <costmap_2d/costmap_layer.h>
@@ -38,7 +38,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <tf/transform_listener.h>
 
-namespace tf_layer
+namespace costmap_tf_layer
 {
 
 /*
@@ -46,20 +46,20 @@ namespace tf_layer
  * @brief A costmap layer that is populated by observing robot frames
  */
 
-class TfLayer : public costmap_2d::CostmapLayer
+class CostmapTfLayer : public costmap_2d::CostmapLayer
 {
 public:
-  TfLayer();
+  CostmapTfLayer();
   virtual void onInitialize();
- virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
+  virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
                             double* max_y);
- virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
- bool isDiscretized()
- {
-   return true;
- }
+  virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
+  bool isDiscretized()
+  {
+    return true;
+  }
 
- virtual void matchSize();
+  virtual void matchSize();
 
 private:
   tf::TransformListener listener;
@@ -68,10 +68,10 @@ private:
   std::string robot_frame;
   std::vector<std::string> other_robot_frames;
 
- void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
- dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
+  void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
+  dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
 };
 
-}  // namespace tf_layer
+}  // namespace costmap_tf_layer
 
-#endif  // TF_LAYER_TF_LAYER_H_
+#endif  // costmap_tf_layer_costmap_tf_layer_H_

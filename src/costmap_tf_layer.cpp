@@ -28,20 +28,20 @@
  */
 #include <costmap_2d/costmap_math.h>
 #include <pluginlib/class_list_macros.h>
-#include <tf_layer/tf_layer.h>
+#include <costmap_tf_layer/costmap_tf_layer.h>
 
-PLUGINLIB_EXPORT_CLASS(tf_layer::TfLayer, costmap_2d::Layer)
+PLUGINLIB_EXPORT_CLASS(costmap_tf_layer::CostmapTfLayer, costmap_2d::Layer)
 
 using costmap_2d::NO_INFORMATION;
 using costmap_2d::LETHAL_OBSTACLE;
 using costmap_2d::FREE_SPACE;
 
-namespace tf_layer
+namespace costmap_tf_layer
 {
 
-  TfLayer::TfLayer() {}
+  CostmapTfLayer::CostmapTfLayer() {}
 
-  void TfLayer::onInitialize()
+  void CostmapTfLayer::onInitialize()
   {
     ros::NodeHandle nh("~/" + name_), g_nh;
     current_ = true;
@@ -52,7 +52,7 @@ namespace tf_layer
 
     dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
     dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
-        &TfLayer::reconfigureCB, this, _1, _2);
+        &CostmapTfLayer::reconfigureCB, this, _1, _2);
     dsrv_->setCallback(cb);
 
     if (!nh.getParam("robot_frame", robot_frame))
@@ -72,7 +72,7 @@ namespace tf_layer
   }
 
 
-  void TfLayer::matchSize()
+  void CostmapTfLayer::matchSize()
   {
     Costmap2D* master = layered_costmap_->getCostmap();
     resizeMap(master->getSizeInCellsX(), master->getSizeInCellsY(), master->getResolution(),
@@ -80,12 +80,12 @@ namespace tf_layer
   }
 
 
-  void TfLayer::reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level)
+  void CostmapTfLayer::reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level)
   {
     enabled_ = config.enabled;
   }
 
-  void TfLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
+  void CostmapTfLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                              double* min_y, double* max_x, double* max_y)
   {
     if (layered_costmap_->isRolling())
@@ -106,7 +106,7 @@ namespace tf_layer
     *max_y = std::max(wy, *max_y);
   }
 
-  void TfLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i,
+  void CostmapTfLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i,
                                             int max_j)
   {
     if (!enabled_)
@@ -136,4 +136,4 @@ namespace tf_layer
       }
     }
   }
-}  // namespace tf_layer
+}  // namespace costmap_tf_layer
