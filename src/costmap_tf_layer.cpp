@@ -29,6 +29,10 @@
 #include <costmap_2d/costmap_math.h>
 #include <pluginlib/class_list_macros.h>
 #include <costmap_tf_layer/costmap_tf_layer.h>
+#include <costmap_2d/footprint.h>
+#include <costmap_tf_layer/CostmapTfLayerConfig.h>
+#include <dynamic_reconfigure/server.h>
+#include <Eigen/Dense>
 
 PLUGINLIB_EXPORT_CLASS(costmap_tf_layer::CostmapTfLayer, costmap_2d::Layer)
 
@@ -41,6 +45,8 @@ namespace costmap_tf_layer
 
   CostmapTfLayer::CostmapTfLayer() {}
 
+  CostmapTfLayer::~CostmapTfLayer() {};
+
   void CostmapTfLayer::onInitialize()
   {
     ros::NodeHandle nh("~/" + name_), g_nh;
@@ -48,27 +54,37 @@ namespace costmap_tf_layer
     default_value_ = NO_INFORMATION;
     matchSize();
 
+    std::string parent_namespace_ = nh.getNamespace();
+    parent_namespace_.erase(parent_namespace_.find_last_of('/')+1, parent_namespace_.length());
+
+    ros::NodeHandle costmap_nh_(parent_namespace_);
+
     global_frame_ = layered_costmap_->getGlobalFrameID();
 
-    dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
-    dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
+    dsrv_ = new dynamic_reconfigure::Server<CostmapTfLayerConfig>(nh);
+    dynamic_reconfigure::Server<CostmapTfLayerConfig>::CallbackType cb = boost::bind(
         &CostmapTfLayer::reconfigureCB, this, _1, _2);
     dsrv_->setCallback(cb);
 
-    if (!nh.getParam("robot_frame", robot_frame))
+    if (!nh.getParam("robot_base_frame", robot_base_frame))
     {
-      std::string namespace_;
-      namespace_ = g_nh.getNamespace();
-
-      g_nh.param<std::string>(namespace_ + "/move_base/robot_frame", robot_frame, "base_link");
-      ROS_INFO("'robot_frame' parameter not provided");
-      ROS_INFO("'robot_frame' set as '%s' ", robot_frame.c_str());
+      if (!costmap_nh_.getParam("robot_base_frame", robot_base_frame)) {
+        robot_base_frame = "/base_link";
+        ROS_INFO("'robot_base_frame' parameter not provided");
+        ROS_INFO("'robot_base_frame' set as '%s' ", robot_base_frame.c_str());
+      }
+      else
+        ROS_INFO("'robot_base_frame' set as '%s' ", robot_base_frame.c_str());
     }
     else
-      ROS_INFO("'robot_frame' set as '%s' ", robot_frame.c_str());
+      ROS_INFO("'robot_base_frame' set as '%s' ", robot_base_frame.c_str());
 
-    if (!nh.getParam("all_robot_frames", other_robot_frames))
+
+    if (!nh.getParam("all_robot_frames", other_robot_frames)) {
       ROS_ERROR("Failed in obtaining param robot_frames");
+    }
+
+    robot_footprint = costmap_2d::makeFootprintFromParams(costmap_nh_);
   }
 
 
@@ -80,9 +96,21 @@ namespace costmap_tf_layer
   }
 
 
-  void CostmapTfLayer::reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level)
+  void CostmapTfLayer::reconfigureCB(costmap_tf_layer::CostmapTfLayerConfig &config, uint32_t level)
   {
     enabled_ = config.enabled;
+
+    if (config.footprint != "" && config.footprint != "[]")
+   {
+     if (costmap_2d::makeFootprintFromString(config.footprint, robot_footprint))
+     {
+         ROS_INFO("nice");
+     }
+     else
+     {
+         ROS_ERROR("Invalid footprint string from dynamic reconfigure");
+     }
+   }
   }
 
   void CostmapTfLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
@@ -114,7 +142,7 @@ namespace costmap_tf_layer
 
     for (std::vector<std::string>::iterator it = other_robot_frames.begin(); it != other_robot_frames.end(); ++it){
 
-      if (robot_frame!=*it){
+      if (robot_base_frame!=*it){
         try {
         //tf::StampedTransform transform;
 
@@ -126,9 +154,17 @@ namespace costmap_tf_layer
         unsigned int mx;
         unsigned int my;
 
-        if(worldToMap(transform.transform.translation.x, transform.transform.translation.y, mx, my)){
-          master_grid.setCost(mx, my, LETHAL_OBSTACLE);
-          }
+        Eigen::Vector3f robot_position(transform.transform.translation.x, transform.transform.translation.y, 0.0);
+
+        std::vector< geometry_msgs::Point > oriented_robot_footprint;
+
+        costmap_2d::transformFootprint(0.0, 0.0, transform.transform.rotation.z, robot_footprint, oriented_robot_footprint);
+
+        std::vector <base_local_planner::Position2DInt > robot_cells = footprint_helper_.getFootprintCells(robot_position, oriented_robot_footprint, master_grid, true);
+
+        for (int i = 0; i < robot_cells.size(); i++){
+          master_grid.setCost(robot_cells[i].x, robot_cells[i].y, LETHAL_OBSTACLE);
+        }
         }
         catch (tf::TransformException ex){
           ROS_ERROR("%s",ex.what());

@@ -36,7 +36,9 @@
 #include <costmap_2d/layered_costmap.h>
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <costmap_tf_layer/CostmapTfLayerConfig.h>
 #include <tf/transform_listener.h>
+#include <base_local_planner/footprint_helper.h>
 
 namespace costmap_tf_layer
 {
@@ -50,6 +52,7 @@ class CostmapTfLayer : public costmap_2d::CostmapLayer
 {
 public:
   CostmapTfLayer();
+  ~CostmapTfLayer();
   virtual void onInitialize();
   virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
                             double* max_y);
@@ -65,11 +68,16 @@ private:
   tf::TransformListener listener;
 
   std::string global_frame_;
-  std::string robot_frame;
+  std::string robot_base_frame;
+  std::string footprint_;
   std::vector<std::string> other_robot_frames;
 
-  void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
-  dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
+  void reconfigureCB(CostmapTfLayerConfig &config, uint32_t level);
+  dynamic_reconfigure::Server<CostmapTfLayerConfig> *dsrv_;
+
+  base_local_planner::FootprintHelper footprint_helper_;
+
+  std::vector< geometry_msgs::Point > robot_footprint;
 };
 
 }  // namespace costmap_tf_layer
